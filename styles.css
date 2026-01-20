@@ -67,3 +67,7 @@ body {
     font-size: 50px;
     padding: 0 20px;
 }
+
+.selected {
+    background-color: rgb(87, 197, 233);
+}

@@ -55,8 +55,8 @@ function devide(a, b) {
 function operate(a, op, b) {
     if(isNaN(a) || isNaN(b))
         return "Invalid";
-    a = parseFloat(a);
-    b = parseFloat(b);
+    a = +a;
+    b = +b;
     switch(op) {
         case "+":
             return add(a, b);
@@ -73,99 +73,108 @@ function clearDisplay() {
     display.innerText = "";
 }
 
-let actionBtns = ["BS", "C", "="];
-let operatorBtns = ["+", "-", "*", "/"];
-
-function runActions (btn) {
-    switch(btn.innerText) {
+function doAction(actionLabel) {
+    switch(actionLabel) {
         case "=":
             if(op2) {
-                console.log("operating");
-                display.innerText = operate(op1, operator, op2);
-                resetState();
-                needDisplayClear = true;
+                result = operate(op1, operator, op2);
+                console.log(result);
+                op1 = result;
+                resetStates();
+                clearDisplay();
+                resultShown = true;
+                display.innerText = result;
+                break;
             }
             else {
-                console.log("empty equal");
+                display.innerText = "Invalid";
+            }
+            break;
+        case "BS":
+            let text = display.innerText;
+            text = text.substring(0, text.length - 1);
+            display.innerText = text;
+            if(operator && op2) {
+                op2 = op2.substring(0, op2.length - 1);
+            }
+            else {
+                op1 = op1.substring(0, op1.length - 1);
             }
             break;
         case "C":
-            clearDisplay();
-            resetState();
-            needDisplayClear = true;
-            break;
+            display.innerText = "";
+            resetStates();
+            op1 = "";
     }
 }
 
-function takeOperator(btn) {
-}
-
-
-let firstPress = true;
-let operatorPressed = false;
-let needDisplayClear = false;
+let actionBtns = ["BS", "C", "="];
+let operatorBtns = ["+", "-", "*", "/"];
 let op1 = "";
 let op2 = "";
-let operator = "";
+let operator;
+let result;
+let needClear = false;
+let resultShown = false;
 
-function resetState() {
-    firstPress = true;
-    operatorPressed = false;
-    needDisplayClear = false;
-    op1 = "";
+function resetStates() {
     op2 = "";
-    operator = "";
+    operator = null;
+    result;
+    resultShown = false;
 }
 
 btnBody.addEventListener("click", (event) => {
-
-    if(event.target.id == "btnBody") return; // do nothing if just the button container is pressed
-
-    if(actionBtns.includes(event.target.innerText)) { // check if action buttons(clear/backspace/equal) are pressed
-        runActions(event.target);
+    btn = event.target;
+    btnLabel = btn.innerText;
+    let pastSelected = document.querySelector(".selected");
+    if(pastSelected) {
+        pastSelected.classList.remove("selected");
+    }
+    if( btn == btnBody) return;
+    if(actionBtns.includes(btnLabel)) {
+        doAction(btnLabel);
+        console.log(op1, operator, op2);
         return;
     }
 
-    console.log("non and nonAction is non");
-    
-    if(operatorBtns.includes(event.target.innerText)) { // check if operator button is pressed
-        if(firstPress) {
-            op1 += event.target.innerText;
-            return;
-        }
-        if(operatorPressed && op2) {
-            pastResult = operate(op1, operator, op2);
-            display.innerText = pastResult;
-            op1 = pastResult;
+    if(operatorBtns.includes(btnLabel)) {
+        if(operator && op2) {
+            console.log("do past");
+            result = operate(op1, operator, op2);
+            display.innerText = result;
+            op1 = result;
             op2 = "";
-            needDisplayClear = true;
-            operator = event.target.innerText;
-            console.log(op1,operator, op2)
-            return;
         }
-        needDisplayClear = true;
-        operatorPressed = true;
-        operator = event.target.innerText;
-        console.log(operator);
+        operator = btnLabel;
+        needClear = true;
+        btn.classList.add("selected");
         return;
     }
-    
-    if(needDisplayClear) {
-        console.log("need clearn");
+
+    if(needClear) {
         clearDisplay();
-        needDisplayClear = false;
-    }
-    if(!operatorPressed) {
-        op1 += event.target.innerText;
-        display.innerText += event.target.innerText;
-    }
-    if(operatorPressed) {
-        display.innerText += event.target.innerText;
-        op2 += event.target.innerText;
     }
 
-    firstPress = false;
+    if(operator) {
+        if(btnLabel == ".") {
+            if(op2.includes("."))
+                return;
+        }
+        needClear = false;
+        display.innerText += btnLabel;
+        op2 += btnLabel;
+    }
+    else {
+        if(btnLabel == ".") {
+            if(op1.includes("."))
+                return;
+        }
+        op1 += btnLabel;
+        display.innerText += btnLabel;
+    }
 
+    console.log(op1, operator, op2);
+    
 
-    console.log(op1,operator, op2)
 });
