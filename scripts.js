@@ -70,6 +70,9 @@ function multiply(a, b) {
     return a * b;
 }
 function devide(a, b) {
+    if(b == 0) {
+        return "Reality.exe stopped working";
+    }
     return a / b;
 }
 
@@ -93,6 +96,7 @@ function operate(a, op, b) {
             result = devide(a, b);
             break;
     }
+    if(isNaN(result)) return result;
     result = result.toFixed(5);
     if(result % 1 == 0)
         return parseInt(result);
@@ -114,10 +118,6 @@ function doAction(actionLabel) {
                 resultShown = true;
                 needClear = true;
                 display.innerText = result;
-                break;
-            }
-            else {
-                display.innerText = "Invalid";
             }
             break;
         case "BS":
