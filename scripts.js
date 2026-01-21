@@ -225,7 +225,7 @@ document.addEventListener("keydown", (event) => {
     if(operatorBtns.includes(key)) {
         btnElement = Array.from(btnList).find(b => b.innerText === key);
     }
-    if(key == "Enter") {
+    if(key == "Enter" || key == "=") {
         event.preventDefault(); 
         let enter = document.querySelector(".b15");
         buttonPressHandler("=", enter);
