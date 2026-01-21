@@ -1,3 +1,24 @@
+/* 
+CALCULATOR STATE MANAGEMENT:
+
+Variables:
+- op1: first number (string)
+- op2: second number (string)  
+- operator: current operator (+, -, *, /)
+- result: calculation result
+- needClear: flag to clear display before next input
+- resultShown: flag indicating we just showed a result
+
+Flow:
+1. User types numbers -> goes into op1
+2. User presses operator -> saves to operator variable, sets needClear
+3. User types more numbers -> goes into op2
+4. User presses = -> calculates op1 operator op2, stores in result and op1
+5. User can continue (press operator) or start fresh (press number)
+
+Key insight: display and variables are SEPARATE - always update both
+*/
+
 const btnBody = document.querySelector("#btnBody");
 const display = document.querySelector("#display");
 let btnList = [];
@@ -57,16 +78,25 @@ function operate(a, op, b) {
         return "Invalid";
     a = +a;
     b = +b;
+    let result = 0;
     switch(op) {
         case "+":
-            return add(a, b);
+            result = add(a, b);
+            break;
         case "-":
-            return subtract(a, b);
+            result = subtract(a, b);
+            break;
         case "*":
-            return multiply(a, b);
+            result = multiply(a, b);
+            break;
         case "/":
-            return devide(a, b);
+            result = devide(a, b);
+            break;
     }
+    result = result.toFixed(5);
+    if(result % 1 == 0)
+        return parseInt(result);
+    return result;
 }
 
 function clearDisplay() {
@@ -78,11 +108,11 @@ function doAction(actionLabel) {
         case "=":
             if(op2) {
                 result = operate(op1, operator, op2);
-                console.log(result);
-                op1 = result;
                 resetStates();
+                op1 = result;
                 clearDisplay();
                 resultShown = true;
+                needClear = true;
                 display.innerText = result;
                 break;
             }
@@ -94,6 +124,10 @@ function doAction(actionLabel) {
             let text = display.innerText;
             text = text.substring(0, text.length - 1);
             display.innerText = text;
+            if(!operator) {
+                display.innerText = "";
+                break;
+            }
             if(operator && op2) {
                 op2 = op2.substring(0, op2.length - 1);
             }
@@ -104,6 +138,7 @@ function doAction(actionLabel) {
         case "C":
             display.innerText = "";
             resetStates();
+            needClear = false;
             op1 = "";
     }
 }
@@ -118,37 +153,34 @@ let needClear = false;
 let resultShown = false;
 
 function resetStates() {
+    op1 = "";
     op2 = "";
     operator = null;
     result;
     resultShown = false;
 }
 
-btnBody.addEventListener("click", (event) => {
-    btn = event.target;
-    btnLabel = btn.innerText;
+
+function buttonPressHandler(btnLabel, btn) {
     let pastSelected = document.querySelector(".selected");
     if(pastSelected) {
         pastSelected.classList.remove("selected");
     }
-    if( btn == btnBody) return;
     if(actionBtns.includes(btnLabel)) {
         doAction(btnLabel);
-        console.log(op1, operator, op2);
         return;
     }
 
     if(operatorBtns.includes(btnLabel)) {
         if(operator && op2) {
-            console.log("do past");
             result = operate(op1, operator, op2);
             display.innerText = result;
             op1 = result;
             op2 = "";
         }
+        if(btn) btn.classList.add("selected");
         operator = btnLabel;
         needClear = true;
-        btn.classList.add("selected");
         return;
     }
 
@@ -166,6 +198,12 @@ btnBody.addEventListener("click", (event) => {
         op2 += btnLabel;
     }
     else {
+        if(resultShown) {
+            op1 = "";
+            display.innerText = "";
+            resultShown = false;
+            needClear = false;
+        }
         if(btnLabel == ".") {
             if(op1.includes("."))
                 return;
@@ -173,8 +211,32 @@ btnBody.addEventListener("click", (event) => {
         op1 += btnLabel;
         display.innerText += btnLabel;
     }
+}
 
-    console.log(op1, operator, op2);
-    
-
+btnBody.addEventListener("click", (event) => {
+    btn = event.target;
+    if( btn == btnBody) return;
+    return buttonPressHandler(btn.innerText, btn);
 });
+
+document.addEventListener("keydown", (event) => {
+    const key = event.key;
+    let btnElement = null;
+    if(operatorBtns.includes(key)) {
+        btnElement = Array.from(btnList).find(b => b.innerText === key);
+    }
+    if(key == "Enter") {
+        event.preventDefault(); 
+        let enter = document.querySelector(".b15");
+        buttonPressHandler("=", enter);
+    }
+    else if(key == "Escape") {
+        buttonPressHandler("C");
+    }
+    else if(key == "Backspace") {
+        buttonPressHandler("BS");
+    }
+    else if("0123456789.+-*/".includes(key)) {
+        buttonPressHandler(key, btnElement);
+    }
+})

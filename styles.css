@@ -57,14 +57,14 @@ body {
 }
 
 #display {
-    
+  
     flex-basis: 135px;
     background-color: lightblue;
     border-radius: 16px;
     display: flex;
     justify-content: end;
     align-items: center;
-    font-size: 50px;
+    font-size: 30px;
     padding: 0 20px;
 }
 
