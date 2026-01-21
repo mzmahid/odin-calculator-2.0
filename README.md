@@ -1,7 +1,7 @@
 # odin-calculator
 An old school basic Calculator with single display for input and output.
 
-Demo preview -> https://mzmahid.github.io/odin-calculator-2.0.git/
+Demo preview -> https://mzmahid.github.io/odin-calculator-2.0/
 
 This project is the final assignment of The odin project Foundations. This is my first time writing a full system from scratch.
 
